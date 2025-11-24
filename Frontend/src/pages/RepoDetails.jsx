@@ -9,6 +9,7 @@ const RepoDetails = () => {
     const { owner, repo } = useParams();
     const navigate = useNavigate();
     const [repoData, setRepoData] = useState(null);
+    const [repoWebhook, setRepoWebhook] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -20,8 +21,14 @@ const RepoDetails = () => {
 
         const fetchRepoDetails = async () => {
             try {
-                const data = await githubservice.getRepositoryDetails(owner, repo, token);
+                const [data, mapping] = await Promise.all([
+                    githubservice.getRepoDetail(owner, repo, token),
+                    // get mapping from backend (may fail if session not present)
+                    githubservice.getRepoInfo(owner, repo).catch(() => null),
+                ]);
+
                 setRepoData(data);
+                if (mapping && mapping.repo) setRepoWebhook(mapping.repo);
             } catch (error) {
                 console.error('Failed to fetch repository details:', error);
             } finally {
@@ -61,6 +68,18 @@ const RepoDetails = () => {
                     </div>
                     <p className="text-gray-600 mb-4">{details.description}</p>
                     <RepoStats stats={details} />
+                    {repoWebhook && (
+                        <div className="mt-4 p-4 border rounded bg-gray-50">
+                            <h3 className="text-lg font-medium text-gray-800">Webhook Details</h3>
+                            <div className="text-sm text-gray-700 mt-2">
+                                <div>Webhook ID: <span className="font-mono text-xs text-gray-900">{repoWebhook.webhookId}</span></div>
+                                {repoWebhook.createdAt && (
+                                    <div>Created: {new Date(repoWebhook.createdAt).toLocaleString()}</div>
+                                )}
+                                <div className="mt-2 text-xs text-gray-600">This webhook is configured to send push events to the backend.</div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="bg-white rounded-lg shadow-md p-6">

@@ -1,8 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { githubservice } from '../services/github';
 
 const RepositoryCard = ({ repo }) => {
     const navigate = useNavigate();
+
+    const [setupStatus, setSetupStatus] = useState('idle'); // idle | loading | success | error
+    const [setupMessage, setSetupMessage] = useState('');
+
+    const setupWebhook = async (e) => {
+        e.stopPropagation();
+        setSetupStatus('loading');
+        setSetupMessage('Creating webhook...');
+        try {
+            const data = await githubservice.createWebhookOnRepo(repo.owner.login, repo.name);
+            console.log('Webhook created:', data);
+            setSetupStatus('success');
+            setSetupMessage('Webhook created successfully');
+        } catch (err) {
+            console.error('Failed to create webhook', err);
+            setSetupStatus('error');
+            setSetupMessage(err?.message || 'Failed to create webhook');
+        }
+        // clear success message after a short delay
+        setTimeout(() => {
+            setSetupStatus('idle');
+            setSetupMessage('');
+        }, 4000);
+    };
 
     return (
         <div
@@ -24,9 +49,60 @@ const RepositoryCard = ({ repo }) => {
                         {repo.forks_count}
                     </span>
                 </div>
-                <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
-                    {repo.language || 'No language'}
-                </span>
+                <div className="flex items-center space-x-2">
+                    {repo.webhook ? (
+                        <div className="flex items-center space-x-2">
+                            <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Webhook: {repo.webhook.webhookId}</span>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); navigate(`/repo/${repo.owner.login}/${repo.name}`); }}
+                                className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200"
+                            >
+                                View Details
+                            </button>
+                            <button
+                                onClick={async (e) => {
+                                    e.stopPropagation();
+                                    if (!confirm('Remove webhook for this repo?')) return;
+                                    setSetupStatus('loading');
+                                    try {
+                                        await githubservice.removeRepoWebhook(repo.owner.login, repo.name);
+                                        // simple refresh to update list; in future we can update the parent state
+                                        window.location.reload();
+                                    } catch (err) {
+                                        console.error('Failed to remove webhook', err);
+                                        setSetupStatus('error');
+                                        setSetupMessage(err?.message || 'Failed to remove webhook');
+                                        setTimeout(() => setSetupStatus('idle'), 3000);
+                                    }
+                                }}
+                                className="text-xs px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                            >
+                                Remove
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={setupWebhook}
+                                    disabled={setupStatus === 'loading'}
+                                    className={`text-xs px-2 py-1 rounded-md ${setupStatus === 'loading' ? 'bg-gray-300 text-gray-700' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+                                >
+                                    {setupStatus === 'loading' ? 'Setting up...' : 'Setup Webhook'}
+                                </button>
+                                {setupStatus === 'success' && (
+                                    <span className="text-xs text-green-600">{setupMessage}</span>
+                                )}
+                                {setupStatus === 'error' && (
+                                    <span className="text-xs text-red-600">{setupMessage}</span>
+                                )}
+                            </div>
+                            <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
+                                {repo.language || 'No language'}
+                            </span>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

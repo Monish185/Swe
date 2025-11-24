@@ -20,7 +20,21 @@ const Home = () => {
     const fetchRepositories = async () => {
       try {
         const repos = await githubservice.getRepos(token);
-        setRepositories(repos);
+        // fetch user's webhook mappings from backend and merge
+        let mappings = [];
+        try {
+          const m = await githubservice.getUserRepoMappings();
+          mappings = m.repos || [];
+        } catch (err) {
+          console.warn('Failed to fetch repo mappings:', err.message || err);
+        }
+
+        const merged = repos.map(r => {
+          const match = mappings.find(m => m.owner === r.owner.login && m.repo === r.name);
+          return { ...r, webhook: match || null };
+        });
+
+        setRepositories(merged);
       } catch (error) {
         console.error('Failed to fetch repositories:', error);
       } finally {
