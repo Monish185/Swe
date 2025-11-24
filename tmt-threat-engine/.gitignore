@@ -1,0 +1,134 @@
+#################################
+# OS / SYSTEM FILES
+#################################
+.DS_Store
+Thumbs.db
+ehthumbs.db
+*.swp
+*.swo
+
+#################################
+# LOG FILES
+#################################
+*.log
+*.tmp
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+#################################
+# ENV / SECRETS
+#################################
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+
+#################################
+# PYTHON
+#################################
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+build/
+dist/
+pip-wheel-metadata/
+*.egg
+venv/
+.venv/
+
+#################################
+# NODE / JAVASCRIPT
+#################################
+node_modules/
+npm-debug.log
+yarn.lock
+package-lock.json
+
+# Uncomment if you don’t want lockfiles:
+# package-lock.json
+# yarn.lock
+
+#################################
+# JAVA / JVM
+#################################
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+/.idea/
+
+#################################
+# RUST
+#################################
+target/
+Cargo.lock
+
+#################################
+# GO
+#################################
+bin/
+vendor/
+
+#################################
+# CPP / C / CMAKE
+#################################
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.out
+build/
+
+#################################
+# EDITORS / IDEs
+#################################
+
+# VSCode
+.vscode/
+
+# JetBrains (IntelliJ, WebStorm, PyCharm...)
+.idea/
+*.iml
+
+# Eclipse
+.project
+.settings/
+.classpath
+
+# Others
+*.sublime-workspace
+*.sublime-project
+
+#################################
+# MISC BUILD
+#################################
+cache/
+*.bak
+*.orig
+
+#################################
+# BACKUP FILES
+#################################
+*.backup
+*.old
+*.tmp
+
+#################################
+# TEST COVERAGE
+#################################
+coverage/
+*.lcov
+
+#################################
+# OTHER COMMON FILES
+#################################
+*.sqlite
+*.db

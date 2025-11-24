@@ -1,0 +1,110 @@
+[
+  {
+    "id": "STRIDE-001",
+    "title": "Hardcoded secret or API key in code",
+    "description": "Potential exposure of secret keys or credentials in source code.",
+    "category": "Information Disclosure",
+    "severity": "High",
+    "regex": "(API_KEY|SECRET_KEY|accessKeyId|secretAccessKey|PRIVATE_KEY|jwtSecret)",
+    "fileExtensions": [".js", ".ts", ".py", ".java", ".php", ".cs"]
+  },
+  {
+    "id": "STRIDE-002",
+    "title": "Potential SQL query constructed via string concatenation",
+    "description": "Building SQL queries using string concatenation can lead to SQL Injection.",
+    "category": "Tampering",
+    "severity": "High",
+    "regex": "SELECT\\s+.*FROM[\\s\\S]*\\+",
+    "fileExtensions": [".js", ".ts", ".py", ".java", ".php", ".cs"]
+  },
+  {
+    "id": "STRIDE-003",
+    "title": "HTTP used instead of HTTPS for external calls",
+    "description": "Using plain HTTP can allow traffic sniffing and man-in-the-middle attacks.",
+    "category": "Information Disclosure",
+    "severity": "Medium",
+    "regex": "http://",
+    "fileExtensions": [".js", ".ts", ".py", ".java"]
+  },
+  {
+    "id": "STRIDE-004",
+    "title": "JWT used without verification checks",
+    "description": "Improper handling of JWTs may allow spoofing or privilege escalation.",
+    "category": "Spoofing",
+    "severity": "Medium",
+    "regex": "jwt\\.decode\\(",
+    "fileExtensions": [".js", ".ts"]
+  },
+  {
+    "id": "STRIDE-005",
+    "title": "Express route without authentication middleware (heuristic pattern)",
+    "description": "Public route might expose sensitive operations without auth checks.",
+    "category": "Elevation of Privilege",
+    "severity": "Medium",
+    "regex": "app\\.(get|post|put|delete)\\(['\"].*['\"],\\s*\\(req,\\s*res",
+    "fileExtensions": [".js", ".ts"]
+  },
+  {
+    "id": "STRIDE-006",
+    "title": "Use of eval() or equivalent",
+    "description": "Dynamic code execution can be exploited for code injection.",
+    "category": "Tampering",
+    "severity": "High",
+    "regex": "\\beval\\(",
+    "fileExtensions": [".js", ".ts", ".py", ".php"]
+  },
+  {
+    "id": "STRIDE-007",
+    "title": "Hardcoded password-like string",
+    "description": "A variable that looks like it may contain a hardcoded password.",
+    "category": "Information Disclosure",
+    "severity": "High",
+    "regex": "(password|pwd|pass)\\s*[:=]\\s*['\"][^'\"]+['\"]",
+    "fileExtensions": [".js", ".ts", ".py", ".java", ".php", ".cs"]
+  },
+  {
+    "id": "STRIDE-008",
+    "title": "Disabled TLS certificate verification",
+    "description": "Disabling certificate verification weakens HTTPS and can allow MITM attacks.",
+    "category": "Information Disclosure",
+    "severity": "High",
+    "regex": "(rejectUnauthorized:\\s*false|process\\.env\\.NODE_TLS_REJECT_UNAUTHORIZED\\s*=\\s*['\"]0['\"])",
+    "fileExtensions": [".js", ".ts"]
+  },
+  {
+    "id": "STRIDE-009",
+    "title": "CORS wildcard origin",
+    "description": "Allowing any origin in CORS configuration can expose APIs to untrusted origins.",
+    "category": "Information Disclosure",
+    "severity": "Medium",
+    "regex": "(origin\\s*:\\s*['\"]\\*['\"]|Access-Control-Allow-Origin['\"]?\\s*[:=]\\s*['\"]\\*['\"])",
+    "fileExtensions": [".js", ".ts"]
+  },
+  {
+    "id": "STRIDE-010",
+    "title": "Logging of sensitive data",
+    "description": "Logging of request bodies or credentials may lead to information disclosure in logs.",
+    "category": "Information Disclosure",
+    "severity": "Medium",
+    "regex": "console\\.log\\(.*(password|passwd|secret|token|authorization)",
+    "fileExtensions": [".js", ".ts"]
+  },
+  {
+    "id": "STRIDE-011",
+    "title": "Use of insecure crypto algorithm (MD5/SHA1)",
+    "description": "Use of weak hash functions like MD5/SHA1 may be insecure for modern cryptographic needs.",
+    "category": "Tampering",
+    "severity": "Medium",
+    "regex": "(crypto\\.createHash\\(['\"]md5['\"]\\)|crypto\\.createHash\\(['\"]sha1['\"]\\))",
+    "fileExtensions": [".js", ".ts"]
+  },
+  {
+    "id": "STRIDE-012",
+    "title": "Use of random without cryptographic security",
+    "description": "Using predictable random sources for security tokens may allow guessing of values.",
+    "category": "Spoofing",
+    "severity": "Low",
+    "regex": "(Math\\.random\\(\\))",
+    "fileExtensions": [".js", ".ts"]
+  }
+]

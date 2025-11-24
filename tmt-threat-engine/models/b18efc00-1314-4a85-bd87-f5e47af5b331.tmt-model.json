@@ -1,0 +1,21 @@
+{
+  "id": "b18efc00-1314-4a85-bd87-f5e47af5b331",
+  "appName": "b18efc00-1314-4a85-bd87-f5e47af5b331",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "hasFrontend": false,
+    "hasBackend": false
+  },
+  "createdAt": "2025-11-24T09:58:25.671Z",
+  "processes": [],
+  "dataStores": [],
+  "dataFlows": [],
+  "metadata": {
+    "hasEnvFile": true,
+    "envFiles": [
+      "C:\\Users\\rahul\\OneDrive\\Desktop\\SWE PROJECT\\Swe\\tmt-threat-engine\\tmp\\b18efc00-1314-4a85-bd87-f5e47af5b331\\.env.example"
+    ]
+  }
+}
