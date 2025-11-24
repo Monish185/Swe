@@ -1,5 +1,3 @@
-// server.js
-import express from "express";
 import { exec } from "child_process";
 import simpleGit from "simple-git";
 import fs from "fs";
@@ -8,19 +6,15 @@ import path from "path";
 import os from "os";
 
 const execPromise = util.promisify(exec);
-const app = express();
-app.use(express.json());
 
 // === CONFIG ===
 const DEP_CHECK_PATH = "/home/wrapy/depcheck/dependency-check/bin/dependency-check.sh";
-const NVD_API_KEY = "259c0ba1-05aa-4387-91cf-5505ac1fd7b6"; // Replace with your key
-const OUTPUT_DIR = process.cwd(); // Save structured report in current working directory
+const NVD_API_KEY = "259c0ba1-05aa-4387-91cf-5505ac1fd7b6"; // put env var later
+const OUTPUT_DIR = process.cwd();
 
-app.post("/depcheck", async (req, res) => {
-  const { repoUrl } = req.body;
+export async function runDependencyCheck(repoUrl) {
   if (!repoUrl) {
-    console.log("[X] No repo URL provided.");
-    return res.status(400).send("Repo URL required.");
+    throw new Error("Repo URL required.");
   }
 
   const tempDir = path.join(os.tmpdir(), `repo-${Date.now()}`);
@@ -39,7 +33,7 @@ app.post("/depcheck", async (req, res) => {
     await simpleGit().clone(repoUrl, tempDir);
     console.log("[✅] Clone complete.");
 
-    // Step 2️⃣ Run OWASP Dependency-Check
+    // Step 2️⃣ Run Dependency-Check
     console.log("[2️⃣] Running Dependency-Check...");
 
     const command = `${DEP_CHECK_PATH} \
@@ -50,15 +44,17 @@ app.post("/depcheck", async (req, res) => {
       --nvdApiKey ${NVD_API_KEY}`;
 
     console.log(`[ℹ️] Executing: ${command}`);
+
     const { stderr } = await execPromise(command, {
       timeout: 900000,
       maxBuffer: 1024 * 1024 * 500,
     });
 
     if (stderr) console.warn("[⚠️] DepCheck stderr:", stderr);
+
     console.log("[✅] Dependency-Check completed.");
 
-    // Step 3️⃣ Locate and parse the JSON report
+    // Step 3️⃣ Parse JSON Report
     console.log("[3️⃣] Parsing JSON report...");
 
     let reportPath;
@@ -99,7 +95,7 @@ app.post("/depcheck", async (req, res) => {
 
     console.log(`[✅] Found ${vulnerabilities.length} vulnerabilities.`);
 
-    // Step 4️⃣ Create structured summary
+    // Step 4️⃣ Structured Summary
     const summary = {
       repo: repoUrl,
       total_dependencies: dependencies.length,
@@ -112,18 +108,20 @@ app.post("/depcheck", async (req, res) => {
 
     const structuredReport = { summary, vulnerabilities };
 
-    // Step 5️⃣ Save structured JSON in current folder
-    const structuredFile = path.join(process.cwd(), `structured-report-${Date.now()}.json`);
+    // Step 5️⃣ Save structured report
+    const structuredFile = path.join(
+      process.cwd(),
+      `structured-report-${Date.now()}.json`
+    );
     fs.writeFileSync(structuredFile, JSON.stringify(structuredReport, null, 2));
     console.log(`[💾] Structured report saved to ${structuredFile}`);
 
-    // Step 6️⃣ Respond with structured data
-    res.json(structuredReport);
+    return structuredReport;
   } catch (err) {
     console.error("[❌] Error during Dependency-Check:", err.message);
-    res.status(500).send(err.message);
+    throw err;
   } finally {
-    // Step 7️⃣ Cleanup
+    // Step 6️⃣ Cleanup
     try {
       console.log(`[🧹] Cleaning up ${tempDir}`);
       fs.rmSync(tempDir, { recursive: true, force: true });
@@ -133,9 +131,4 @@ app.post("/depcheck", async (req, res) => {
     }
     console.log("====================================================\n");
   }
-});
-
-app.listen(4000, () => {
-  console.log("🚀 Dependency-Check API running on http://localhost:4000");
-  console.log("----------------------------------------------------");
-});
+}

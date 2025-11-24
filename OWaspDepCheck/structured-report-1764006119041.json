@@ -1,0 +1,22 @@
+{
+  "summary": {
+    "repo": "https://github.com/namankhandelwal1607/diSPOSa",
+    "total_dependencies": 10,
+    "vulnerable_dependencies": 1,
+    "severities": {
+      "moderate": 1
+    }
+  },
+  "vulnerabilities": [
+    {
+      "fileName": "js-yaml:4.1.0",
+      "packagePath": "/tmp/repo-1764006107444/newfrontend/package-lock.json?js-yaml",
+      "severity": "moderate",
+      "cve": "GHSA-mh29-5h37-fv8m",
+      "description": "### Impact\n\nIn js-yaml 4.1.0, 4.0.0, and 3.14.1 and below, it's possible for an attacker to modify the prototype of the result of a parsed yaml document via prototype pollution (`__proto__`). All users who parse untrusted yaml documents may be impacted.\n\n### Patches\n\nProblem is patched in js-yaml 4.1.1 and 3.14.2.\n\n### Workarounds\n\nYou can protect against this kind of attack on the server by using `node --disable-proto=delete` or `deno` (in Deno, pollution protection is on by default).\n\n### References\n\nhttps://cheatsheetseries.owasp.org/cheatsheets/Prototype_Pollution_Prevention_Cheat_Sheet.html",
+      "source": "NPM",
+      "cvssScore": 5.300000190734863,
+      "reference": "https://github.com/nodeca/js-yaml/commit/383665ff4248ec2192d1274e934462bb30426879"
+    }
+  ]
+}
