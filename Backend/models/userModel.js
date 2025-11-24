@@ -8,7 +8,15 @@ const userSchema = new mongoose.Schema({
     email:String,
     username: String,
     avatarUrl: String,
-    access_token: String
+    access_token: String,
+    repos: [
+        {
+            owner: { type: String, required: true },
+            repo: { type: String, required: true },
+            webhookId: { type: Number },
+            createdAt: { type: Date, default: Date.now }
+        }
+    ]
 },
 {
     timestamps : true
