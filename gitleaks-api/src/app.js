@@ -1,17 +1,17 @@
 // src/app.js
-const express = require('express');
-const cors = require('cors');
-const scanRoutes = require('./routes/scan.routes');
+import express from "express";
+import cors from "cors";
+import scanRoutes from "./routes/scan.routes.js";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.json({ message: 'Gitleaks API is running' });
+app.get("/", (req, res) => {
+  res.json({ message: "Gitleaks API is running" });
 });
 
-app.use('/scan', scanRoutes);
+app.use("/scan", scanRoutes);
 
-module.exports = app;
+export default app;

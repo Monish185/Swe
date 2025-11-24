@@ -1,27 +1,33 @@
 import axios from "axios";
 
 export const githubservice = {
-    getRepos : async (token) => {
-        console.log("Using token for /user/repos:", token); 
-        const res = await axios.get(`${import.meta.env.VITE_GITHUB_API}/user/repos`,{
-            headers:{
-                Authorization : `token ${token}`,
+    getRepos: async (token) => {
+        console.log("Using token for /user/repos:", token);
+        const res = await axios.get(`${import.meta.env.VITE_GITHUB_API}/user/repos`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
                 Accept: "application/vnd.github+json",
+            },
+            params: {
+                per_page: 100,  // ⬅ get up to 100 repos
+                sort: "created",
+                direction: "desc"
             }
         });
-        return res.data
+        console.log("Fetched repos:", res.data);
+        return res.data;
     },
 
-    getRepoDetail : async(owner,repo,token) => {
-        const [detailsRes,comitRes] = await Promise.all([
-            axios.get(`${import.meta.env.VITE_GITHUB_API}/repos/${owner}/${repo}`,{
-                headers:{Authorization: `token ${token}`},
+    getRepoDetail: async (owner, repo, token) => {
+        const [detailsRes, comitRes] = await Promise.all([
+            axios.get(`${import.meta.env.VITE_GITHUB_API}/repos/${owner}/${repo}`, {
+                headers: { Authorization: `token ${token}` },
             }),
             axios.get(`${import.meta.env.VITE_GITHUB_API}/repos/${owner}/${repo}/commits`, {
                 headers: { Authorization: `token ${token}` },
             }),
         ])
-        return {details: detailsRes.data, commits: comitRes.data}
+        return { details: detailsRes.data, commits: comitRes.data }
     },
 
     /**
@@ -58,5 +64,5 @@ export const githubservice = {
         const res = await axios.delete(url, { withCredentials: true });
         return res.data;
     }
-    
+
 }

@@ -1,0 +1,21 @@
+{
+  "id": "b919430d-d56d-4523-a0f4-13e9370a60b0",
+  "appName": "b919430d-d56d-4523-a0f4-13e9370a60b0",
+  "techStack": {
+    "languages": [
+      "Python"
+    ],
+    "frameworks": [],
+    "packageManager": null,
+    "hasFrontend": false,
+    "hasBackend": false
+  },
+  "createdAt": "2025-11-24T19:28:37.630Z",
+  "processes": [],
+  "dataStores": [],
+  "dataFlows": [],
+  "metadata": {
+    "hasEnvFile": false,
+    "envFiles": []
+  }
+}

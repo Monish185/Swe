@@ -1,9 +1,10 @@
 // src/routes/scan.routes.js
-const express = require('express');
+import express from "express";
+import { scanRepo } from "../controllers/scan.controller.js";
+
 const router = express.Router();
-const { scanRepo } = require('../controllers/scan.controller');
 
 // POST /scan/repo
-router.post('/repo', scanRepo);
+router.post("/repo", scanRepo);
 
-module.exports = router;
+export default router;

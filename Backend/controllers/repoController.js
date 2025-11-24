@@ -203,7 +203,8 @@ exports.githubWebhookHandler = async (req, res) => {
     const userId = user ? user._id : null;
 
     // Call custom pipeline (placeholder)
-    await runCustomPipeline(userId, `${owner}/${repoName}`, branch, commitId);
+    const result = await runCustomPipeline(userId, `${owner}/${repoName}`, branch, commitId);
+    // console.log('Pipeline result:', result);
 
     return res.status(200).json({ message: 'Webhook processed' });
   } catch (err) {

@@ -1,13 +1,13 @@
 // src/controllers/scan.controller.js
-const { runGitleaksScan } = require('../services/gitleaks.service');
+import { runGitleaksScan } from "../services/gitleaks.service.js";
 
-exports.scanRepo = async (req, res) => {
+export const scanRepo = async (req, res) => {
   try {
     const { repoPath, repoUrl } = req.body;
 
     if (!repoPath && !repoUrl) {
       return res.status(400).json({
-        error: 'Either repoPath (local path) or repoUrl (git url) is required',
+        error: "Either repoPath (local path) or repoUrl (git url) is required",
       });
     }
 
@@ -20,10 +20,10 @@ exports.scanRepo = async (req, res) => {
       findings: result.findings,
     });
   } catch (err) {
-    console.error('Error in scanRepo controller:', err);
+    console.error("Error in scanRepo controller:", err);
     return res.status(500).json({
       success: false,
-      error: 'Failed to scan repo with Gitleaks',
+      error: "Failed to scan repo with Gitleaks",
       details: err.message,
     });
   }
