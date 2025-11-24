@@ -1,6 +1,6 @@
 const { runDependencyCheck } = require('../../OWaspDepCheck/utils');
 const { runSemgrepScan } = require('../../Semgrep/utils');
-
+const { runThreatModel } = require('../../tmt-threat-engine/src/utils/utils');
 
 async function runCustomPipeline(userId, repo, branch, commitId) {
     console.log('runCustomPipeline invoked');
@@ -20,6 +20,18 @@ async function runCustomPipeline(userId, repo, branch, commitId) {
         const result = await runDependencyCheck(url);
         console.log(result);
     })();
+
+    (async () => {
+        try {
+            const result = await runThreatModel(url);
+
+            console.log("Final Threat Report:");
+            console.dir(result, { depth: null });
+        } catch (err) {
+            console.error("Error:", err.message);
+        }
+    })();
+
 
 
     return Promise.resolve();

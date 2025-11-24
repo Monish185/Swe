@@ -1,5 +1,5 @@
 import path from "path";
-import strideRules from "./strideRules.json" assert { type: "json" };
+import strideRules from "./strideRules.json" with { type: "json" };
 import { buildSummary } from "./riskScorer.js";
 
 /**
