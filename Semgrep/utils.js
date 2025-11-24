@@ -1,5 +1,3 @@
-// index.js
-import express from "express";
 import { exec } from "child_process";
 import simpleGit from "simple-git";
 import fs from "fs";
@@ -7,17 +5,14 @@ import util from "util";
 import path from "path";
 
 const execPromise = util.promisify(exec);
-const app = express();
-app.use(express.json());
 
-app.post("/scan", async (req, res) => {
-  const { repoUrl } = req.body;
+export async function runSemgrepScan(repoUrl) {
   if (!repoUrl) {
-    console.log("[X] No repo URL provided in request.");
-    return res.status(400).send("Repo URL required.");
+    throw new Error("Repo URL required.");
   }
 
   const tempDir = path.join("/tmp", `repo-${Date.now()}`);
+
   console.log("====================================================");
   console.log(`[+] New scan started`);
   console.log(`[+] Target repo: ${repoUrl}`);
@@ -33,7 +28,6 @@ app.post("/scan", async (req, res) => {
     // Step 2️⃣ - Run Semgrep
     console.log("[2️⃣] Running Semgrep...");
     const semgrepPath = "/home/wrapy/.semgrep-env/bin/semgrep";
-    console.log(`[ℹ️] Using Semgrep at: ${semgrepPath}`);
 
     const { stdout, stderr } = await execPromise(
       `${semgrepPath} --config auto --json ${tempDir}`,
@@ -44,7 +38,7 @@ app.post("/scan", async (req, res) => {
 
     console.log("[✅] Semgrep scan completed. Parsing output...");
 
-    // Step 3️⃣ - Parse and structure results
+    // Step 3️⃣ - Parse output
     const json = JSON.parse(stdout);
     const findings = json.results || [];
 
@@ -75,27 +69,23 @@ app.post("/scan", async (req, res) => {
     console.log(`[ℹ️] Found ${findings.length} total findings.`);
     console.log(`[ℹ️] Severity breakdown:`, summary.severity_breakdown);
 
-    // Step 4️⃣ - Create report
+    // Step 4️⃣ - Final report object
     const report = {
       summary,
       findings: formattedFindings,
     };
 
-    // Step 5️⃣ - Write report to file
+    // Optional: Save to file
     const outputFile = path.join(process.cwd(), "a.json");
     fs.writeFileSync(outputFile, JSON.stringify(report, null, 2));
     console.log(`[💾] Report saved to ${outputFile}`);
 
-    // Step 6️⃣ - Send structured report to client
-    console.log("[✅] Sending structured report to client.");
-    res.json(report);
+    return report;
   } catch (err) {
-    console.log("----------------------------------------------------");
-    console.error("[❌] Error occurred during scan:", err.message);
-    console.log("----------------------------------------------------");
-    res.status(500).send(err.message || "Unknown error during scan.");
+    console.error("[❌] Error during scan:", err.message);
+    throw err;
   } finally {
-    // Step 7️⃣ - Cleanup
+    // Cleanup
     try {
       console.log(`[🧹] Cleaning up directory: ${tempDir}`);
       fs.rmSync(tempDir, { recursive: true, force: true });
@@ -105,9 +95,4 @@ app.post("/scan", async (req, res) => {
     }
     console.log("====================================================\n");
   }
-});
-
-app.listen(3000, () => {
-  console.log("🚀 Semgrep API running on http://localhost:3000");
-  console.log("----------------------------------------------------");
-});
+}
