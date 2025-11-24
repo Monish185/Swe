@@ -1,0 +1,9 @@
+[allowlist]
+description = "Global allowlist"
+regexes = []
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API key"
+regex = '''(?i)(api|token|key)[0-9a-z_\-]{10,}'''
+tags = ["key", "api", "token"]
