@@ -1,0 +1,42 @@
+{
+  "id": "65d149b6-3879-4034-a52c-bf09c0df9369",
+  "appName": "65d149b6-3879-4034-a52c-bf09c0df9369",
+  "techStack": {
+    "languages": [
+      "JavaScript"
+    ],
+    "frameworks": [
+      "Express",
+      "React"
+    ],
+    "packageManager": "npm/yarn",
+    "hasFrontend": true,
+    "hasBackend": true
+  },
+  "createdAt": "2025-11-25T04:36:43.215Z",
+  "processes": [
+    {
+      "id": "P1",
+      "name": "Backend API Server",
+      "trustBoundary": "Server Network"
+    },
+    {
+      "id": "P2",
+      "name": "Web Frontend",
+      "trustBoundary": "Client / Browser"
+    }
+  ],
+  "dataStores": [],
+  "dataFlows": [
+    {
+      "id": "DF1",
+      "from": "Web Frontend",
+      "to": "Backend API Server",
+      "description": "HTTP(S) requests from client to server"
+    }
+  ],
+  "metadata": {
+    "hasEnvFile": false,
+    "envFiles": []
+  }
+}

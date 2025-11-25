@@ -288,8 +288,10 @@ class PDFReportGenerator {
                 });
             x += colWidths[2];
             
-            // CVSS Score
-            const cvssScore = vuln.cvssScore ? vuln.cvssScore.toFixed(1) : 'N/A';
+            // CVSS Score - coerce and validate before formatting
+            const rawCvss = vuln.cvssScore;
+            const cvssNum = typeof rawCvss === 'number' ? rawCvss : Number(rawCvss);
+            const cvssScore = Number.isFinite(cvssNum) ? cvssNum.toFixed(1) : 'N/A';
             this.doc.text(cvssScore, x, y + 10, { width: colWidths[3] - 16 });
             
             y += rowHeight;

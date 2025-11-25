@@ -1,8 +1,42 @@
 {
   "summary": {
-    "repo": "https://github.com/projectman14/apple-frontend-iPhone",
-    "total_findings": 0,
-    "severity_breakdown": {}
+    "repo": "https://github.com/projectman14/test-repo-ddos",
+    "total_findings": 3,
+    "severity_breakdown": {
+      "INFO": 1,
+      "WARNING": 2
+    }
   },
-  "findings": []
+  "findings": [
+    {
+      "severity": "INFO",
+      "rule_id": "javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage",
+      "file": "/tmp/repo-1764045361623/server.js",
+      "line": 7,
+      "message": "A CSRF middleware was not detected in your express application. Ensure you are either using one such as `csurf` or `csrf` (see rule references) and/or you are properly doing CSRF validation in your routes with a token or cookies.",
+      "category": "security",
+      "rule_link": "https://semgrep.dev/r/javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage",
+      "shortlink": "https://sg.run/BxzR"
+    },
+    {
+      "severity": "WARNING",
+      "rule_id": "javascript.express.security.injection.raw-html-format.raw-html-format",
+      "file": "/tmp/repo-1764045361623/server.js",
+      "line": 41,
+      "message": "User data flows into the host portion of this manually-constructed HTML. This can introduce a Cross-Site-Scripting (XSS) vulnerability if this comes from user-provided input. Consider using a sanitization library such as DOMPurify to sanitize the HTML within.",
+      "category": "security",
+      "rule_link": "https://semgrep.dev/r/javascript.express.security.injection.raw-html-format.raw-html-format",
+      "shortlink": "https://sg.run/5DO3"
+    },
+    {
+      "severity": "WARNING",
+      "rule_id": "javascript.express.security.injection.raw-html-format.raw-html-format",
+      "file": "/tmp/repo-1764045361623/server.js",
+      "line": 42,
+      "message": "User data flows into the host portion of this manually-constructed HTML. This can introduce a Cross-Site-Scripting (XSS) vulnerability if this comes from user-provided input. Consider using a sanitization library such as DOMPurify to sanitize the HTML within.",
+      "category": "security",
+      "rule_link": "https://semgrep.dev/r/javascript.express.security.injection.raw-html-format.raw-html-format",
+      "shortlink": "https://sg.run/5DO3"
+    }
+  ]
 }
