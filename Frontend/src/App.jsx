@@ -26,7 +26,7 @@ function App() {
       <Routes>
         <Route path='/' element={<GetStarted />} />
         <Route path='/repos' element={<Home />} />
-        <Route path="/repos/:owner/:repo" element={<RepoDetails />} />
+        <Route path="/repo/:owner/:repo" element={<RepoDetails />} />
       </Routes>
     </>
   )

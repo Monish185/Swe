@@ -1,21 +1,8 @@
 {
   "summary": {
-    "repo": "https://github.com/projectman14/mini-proj",
-    "total_findings": 1,
-    "severity_breakdown": {
-      "ERROR": 1
-    }
+    "repo": "https://github.com/projectman14/apple-frontend-iPhone",
+    "total_findings": 0,
+    "severity_breakdown": {}
   },
-  "findings": [
-    {
-      "severity": "ERROR",
-      "rule_id": "generic.secrets.security.detected-generic-api-key.detected-generic-api-key",
-      "file": "/tmp/repo-1764015563148/main.py",
-      "line": 67,
-      "message": "Generic API Key detected",
-      "category": "security",
-      "rule_link": "https://semgrep.dev/r/generic.secrets.security.detected-generic-api-key.detected-generic-api-key",
-      "shortlink": "https://sg.run/qxj8"
-    }
-  ]
+  "findings": []
 }

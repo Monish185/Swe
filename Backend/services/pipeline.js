@@ -1,64 +1,9 @@
-// const { runDependencyCheck } = require('../../OWaspDepCheck/utils');
-// const { runSemgrepScan } = require('../../Semgrep/utils');
-// const { runThreatModel } = require('../../tmt-threat-engine/src/utils/utils');
-// const { runGitleaksScan } = require('../../gitleaks-api/src/utils');
-
-
-// async function runCustomPipeline(userId, repo, branch, commitId) {
-//     console.log('runCustomPipeline invoked');
-//     console.log('userId:', userId);
-//     console.log('repo:', repo);
-//     console.log('branch:', branch);
-//     console.log('commitId:', commitId);
-
-//     const url = `https://github.com/${repo}`;
-
-//     (async () => {
-//         const report = await runSemgrepScan(url);
-//         console.log("Scan result:", report);
-//     })();
-
-//     (async () => {
-//         const result = await runDependencyCheck(url);
-//         console.log(result);
-//     })();
-
-//     (async () => {
-//         try {
-//             const result = await runThreatModel(url);
-
-//             console.log("Final Threat Report:");
-//             console.dir(result, { depth: null });
-//         } catch (err) {
-//             console.error("Error:", err.message);
-//         }
-//     })();
-
-//     (async () => {
-//         try {
-//             const result = await runGitleaksScan({
-//                 repoUrl: url
-//             });
-
-//             console.log("Final leaks Report:");
-//             console.dir(result, { depth: null });
-//         } catch (err) {
-//             console.error("Error:", err.message);
-//         }
-//     })();
-
-
-
-//     return Promise.resolve();
-// }
-
-// module.exports = { runCustomPipeline };
-
 const { runDependencyCheck } = require('../../OWaspDepCheck/utils');
 const { runSemgrepScan } = require('../../Semgrep/utils');
 const { runThreatModel } = require('../../tmt-threat-engine/src/utils/utils');
 const { runGitleaksScan } = require('../../gitleaks-api/src/utils');
 const { generatePdfReport } = require('./pdfGenerator');
+const Report = require('../models/reportModel');
 
 async function runCustomPipeline(userId, repo, branch, commitId) {
     console.log("runCustomPipeline invoked");
@@ -83,11 +28,29 @@ async function runCustomPipeline(userId, repo, branch, commitId) {
         generatedAt: new Date().toISOString(),
     };
 
-    // Generate PDF
-    await generatePdfReport(finalReport);
+    // Extract owner/repo from full repo name (owner/repo)
+    const [owner, repoName] = repo.split('/');
 
-    // console.log(finalReport);
+    // Save report to DB instead of generating PDF immediately
+    try {
+        await Report.updateOne(
+            { userId, owner, repo: repoName, commitId },
+            {
+                userId,
+                owner,
+                repo: repoName,
+                commitId,
+                branch,
+                finalReport
+            },
+            { upsert: true }
+        );
+        console.log(`Report saved for commit ${commitId}`);
+    } catch (err) {
+        console.error('Failed to save report to DB:', err.message);
+    }
 
+    // Note: PDF generation now happens on-demand via API endpoint
     return finalReport;
 }
 

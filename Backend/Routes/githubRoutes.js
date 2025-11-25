@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const repoController = require('../controllers/repoController');
+const reportController = require('../controllers/reportController');
 
 // POST /api/repos/select - create webhook on repository
 router.post('/repos/select', repoController.selectRepo);
@@ -16,5 +17,15 @@ router.delete('/repos/:owner/:repo', repoController.deleteRepoWebhook);
 
 // GitHub webhook endpoint - use raw body to verify signature
 router.post('/github/webhook', express.raw({ type: 'application/json' }), repoController.githubWebhookHandler);
+
+// Report endpoints
+// GET /api/reports/:owner/:repo/:commitId - retrieve a report
+router.get('/reports/:owner/:repo/:commitId', reportController.getReport);
+
+// POST /api/reports/:owner/:repo/:commitId/download-pdf - generate and download PDF
+router.post('/reports/:owner/:repo/:commitId/download-pdf', reportController.downloadReportPdf);
+
+// GET /api/reports/:owner/:repo - list all reports for a repo
+router.get('/reports/:owner/:repo', reportController.listRepoReports);
 
 module.exports = router;

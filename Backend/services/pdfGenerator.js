@@ -307,326 +307,345 @@ class PDFReportGenerator {
 
     // Generate the complete report
     async generate(report, outputPath) {
-        this.doc = new PDFDocument({ 
-            margin: this.margin,
-            size: 'A4',
-            info: {
-                Title: 'Security Pipeline Report',
-                Author: 'Security Pipeline',
-                Subject: 'Security Analysis'
-            }
-        });
-        
-        this.doc.pipe(fs.createWriteStream(outputPath));
-
-        // ========== COVER PAGE ==========
-        this.addHeader('Security Pipeline Report');
-        
-        // Project info box
-        this.doc.moveDown(3);
-        const infoBoxY = this.doc.y;
-        this.doc.roundedRect(this.margin, infoBoxY, this.contentWidth, 140, 5)
-            .lineWidth(2)
-            .stroke(colors.accent);
-        
-        this.doc.y = infoBoxY + 20;
-        this.doc.fontSize(12);
-        this.addInfoRow('Repository', report.repo, 20);
-        this.addInfoRow('Branch', report.branch, 20);
-        this.addInfoRow('Commit', report.commitId, 20);
-        this.addInfoRow('Generated', new Date(report.generatedAt).toLocaleString(), 20);
-        
-        // Executive Summary
-        this.doc.y = infoBoxY + 160;
-        this.doc.moveDown(1);
-        this.addSectionHeader('Executive Summary', '●');
-        
-        const depCheck = report.dependencyCheck || {};
-        const semgrep = report.semgrep || {};
-        const gitleaks = report.gitleaks || {};
-        
-        const totalVulns = depCheck.summary?.vulnerable_dependencies || 0;
-        const totalFindings = semgrep.summary?.total_findings || 0;
-        const totalSecrets = gitleaks.totalFindings || 0;
-        
-        // Stats cards
-        const cardY = this.doc.y;
-        const cardSpacing = 10;
-        const cardWidth = (this.contentWidth - (cardSpacing * 2)) / 3;
-        
-        this.doc.x = this.margin;
-        this.doc.y = cardY;
-        this.addStatsCard('Dependencies', totalVulns, 'Vulnerabilities', colors.danger);
-        
-        this.doc.x = this.margin + cardWidth + cardSpacing;
-        this.doc.y = cardY;
-        this.addStatsCard('Code Issues', totalFindings, 'Semgrep', colors.warning);
-        
-        this.doc.x = this.margin + (cardWidth + cardSpacing) * 2;
-        this.doc.y = cardY;
-        this.addStatsCard('Secrets', totalSecrets, 'Leaked', colors.critical);
-        
-        this.doc.x = this.margin;
-        this.doc.y = cardY + 100;
-
-        // ========== DEPENDENCY CHECK ==========
-        this.addPage();
-        this.addHeader('Security Pipeline Report');
-        this.addSectionHeader('Dependency Vulnerabilities', '●');
-        
-        if (depCheck.summary) {
-            this.doc.fontSize(11);
-            this.addInfoRow('Total Dependencies', depCheck.summary.total_dependencies?.toString() || '0');
-            this.addInfoRow('Vulnerable Dependencies', totalVulns.toString());
-            
-            if (depCheck.summary.severities) {
-                this.doc.moveDown(0.5);
-                this.doc.fontSize(11)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.text)
-                    .text('Severity Breakdown:', this.margin);
-                this.doc.moveDown(0.3);
-                
-                Object.entries(depCheck.summary.severities).forEach(([severity, count]) => {
-                    this.doc.fontSize(10)
-                        .font('Helvetica')
-                        .fillColor(colors.text)
-                        .text(`  ${severity}: ${count}`, this.margin + 20);
+        return new Promise((resolve, reject) => {
+            try {
+                this.doc = new PDFDocument({ 
+                    margin: this.margin,
+                    size: 'A4',
+                    info: {
+                        Title: 'Security Pipeline Report',
+                        Author: 'Security Pipeline',
+                        Subject: 'Security Analysis'
+                    }
                 });
-            }
-            
-            // Vulnerability table
-            if (depCheck.vulnerabilities && depCheck.vulnerabilities.length > 0) {
+                
+                const writeStream = fs.createWriteStream(outputPath);
+                this.doc.pipe(writeStream);
+
+                // ========== COVER PAGE ==========
+                this.addHeader('Security Pipeline Report');
+                
+                // Project info box
+                this.doc.moveDown(3);
+                const infoBoxY = this.doc.y;
+                this.doc.roundedRect(this.margin, infoBoxY, this.contentWidth, 140, 5)
+                    .lineWidth(2)
+                    .stroke(colors.accent);
+                
+                this.doc.y = infoBoxY + 20;
+                this.doc.fontSize(12);
+                this.addInfoRow('Repository', report.repo, 20);
+                this.addInfoRow('Branch', report.branch, 20);
+                this.addInfoRow('Commit', report.commitId, 20);
+                this.addInfoRow('Generated', new Date(report.generatedAt).toLocaleString(), 20);
+                
+                // Executive Summary
+                this.doc.y = infoBoxY + 160;
                 this.doc.moveDown(1);
-                this.doc.fontSize(12)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.text)
-                    .text('Top Vulnerabilities:', this.margin);
-                this.doc.moveDown(0.5);
+                this.addSectionHeader('Executive Summary', '●');
                 
-                this.addVulnerabilityTable(depCheck.vulnerabilities);
+                const depCheck = report.dependencyCheck || {};
+                const semgrep = report.semgrep || {};
+                const gitleaks = report.gitleaks || {};
                 
-                if (depCheck.vulnerabilities.length > 15) {
-                    this.doc.fontSize(9)
-                        .font('Helvetica-Oblique')
-                        .fillColor(colors.secondary)
-                        .text(`... and ${depCheck.vulnerabilities.length - 15} more vulnerabilities`, 
-                              this.margin, this.doc.y, { align: 'center' });
+                const totalVulns = depCheck.summary?.vulnerable_dependencies || 0;
+                const totalFindings = semgrep.summary?.total_findings || 0;
+                const totalSecrets = gitleaks.totalFindings || 0;
+                
+                // Stats cards
+                const cardY = this.doc.y;
+                const cardSpacing = 10;
+                const cardWidth = (this.contentWidth - (cardSpacing * 2)) / 3;
+                
+                this.doc.x = this.margin;
+                this.doc.y = cardY;
+                this.addStatsCard('Dependencies', totalVulns, 'Vulnerabilities', colors.danger);
+                
+                this.doc.x = this.margin + cardWidth + cardSpacing;
+                this.doc.y = cardY;
+                this.addStatsCard('Code Issues', totalFindings, 'Semgrep', colors.warning);
+                
+                this.doc.x = this.margin + (cardWidth + cardSpacing) * 2;
+                this.doc.y = cardY;
+                this.addStatsCard('Secrets', totalSecrets, 'Leaked', colors.critical);
+                
+                this.doc.x = this.margin;
+                this.doc.y = cardY + 100;
+
+                // ========== DEPENDENCY CHECK ==========
+                this.addPage();
+                this.addHeader('Security Pipeline Report');
+                this.addSectionHeader('Dependency Vulnerabilities', '●');
+                
+                if (depCheck.summary) {
+                    this.doc.fontSize(11);
+                    this.addInfoRow('Total Dependencies', depCheck.summary.total_dependencies?.toString() || '0');
+                    this.addInfoRow('Vulnerable Dependencies', totalVulns.toString());
+                    
+                    if (depCheck.summary.severities) {
+                        this.doc.moveDown(0.5);
+                        this.doc.fontSize(11)
+                            .font('Helvetica-Bold')
+                            .fillColor(colors.text)
+                            .text('Severity Breakdown:', this.margin);
+                        this.doc.moveDown(0.3);
+                        
+                        Object.entries(depCheck.summary.severities).forEach(([severity, count]) => {
+                            this.doc.fontSize(10)
+                                .font('Helvetica')
+                                .fillColor(colors.text)
+                                .text(`  ${severity}: ${count}`, this.margin + 20);
+                        });
+                    }
+                    
+                    // Vulnerability table
+                    if (depCheck.vulnerabilities && depCheck.vulnerabilities.length > 0) {
+                        this.doc.moveDown(1);
+                        this.doc.fontSize(12)
+                            .font('Helvetica-Bold')
+                            .fillColor(colors.text)
+                            .text('Top Vulnerabilities:', this.margin);
+                        this.doc.moveDown(0.5);
+                        
+                        this.addVulnerabilityTable(depCheck.vulnerabilities);
+                        
+                        if (depCheck.vulnerabilities.length > 15) {
+                            this.doc.fontSize(9)
+                                .font('Helvetica-Oblique')
+                                .fillColor(colors.secondary)
+                                .text(`... and ${depCheck.vulnerabilities.length - 15} more vulnerabilities`, 
+                                      this.margin, this.doc.y, { align: 'center' });
+                        }
+                    }
+                } else {
+                    this.doc.fontSize(11)
+                        .fillColor(colors.success)
+                        .text('✓ No dependency vulnerabilities detected', this.margin);
                 }
-            }
-        } else {
-            this.doc.fontSize(11)
-                .fillColor(colors.success)
-                .text('✓ No dependency vulnerabilities detected', this.margin);
-        }
 
-        // ========== SEMGREP ==========
-        this.addPage();
-        this.addHeader('Security Pipeline Report');
-        this.addSectionHeader('Code Security Analysis (Semgrep)', '●');
-        
-        if (semgrep.summary && totalFindings > 0) {
-            this.doc.fontSize(11);
-            this.addInfoRow('Total Findings', totalFindings.toString());
-            
-            if (semgrep.summary.severity_breakdown && 
-                Object.keys(semgrep.summary.severity_breakdown).length > 0) {
-                this.doc.moveDown(0.5);
-                this.doc.fontSize(11)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.text)
-                    .text('Severity Breakdown:', this.margin);
-                this.doc.moveDown(0.3);
+                // ========== SEMGREP ==========
+                this.addPage();
+                this.addHeader('Security Pipeline Report');
+                this.addSectionHeader('Code Security Analysis (Semgrep)', '●');
                 
-                Object.entries(semgrep.summary.severity_breakdown).forEach(([severity, count]) => {
-                    this.doc.fontSize(10)
-                        .font('Helvetica')
-                        .fillColor(colors.text)
-                        .text(`  ${severity}: ${count}`, this.margin + 20);
-                });
-            }
-            
-            // Findings details
-            if (semgrep.findings && semgrep.findings.length > 0) {
-                this.doc.moveDown(1);
-                this.doc.fontSize(12)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.text)
-                    .text('Findings:', this.margin);
-                this.doc.moveDown(0.5);
+                if (semgrep.summary && totalFindings > 0) {
+                    this.doc.fontSize(11);
+                    this.addInfoRow('Total Findings', totalFindings.toString());
+                    
+                    if (semgrep.summary.severity_breakdown && 
+                        Object.keys(semgrep.summary.severity_breakdown).length > 0) {
+                        this.doc.moveDown(0.5);
+                        this.doc.fontSize(11)
+                            .font('Helvetica-Bold')
+                            .fillColor(colors.text)
+                            .text('Severity Breakdown:', this.margin);
+                        this.doc.moveDown(0.3);
+                        
+                        Object.entries(semgrep.summary.severity_breakdown).forEach(([severity, count]) => {
+                            this.doc.fontSize(10)
+                                .font('Helvetica')
+                                .fillColor(colors.text)
+                                .text(`  ${severity}: ${count}`, this.margin + 20);
+                        });
+                    }
+                    
+                    // Findings details
+                    if (semgrep.findings && semgrep.findings.length > 0) {
+                        this.doc.moveDown(1);
+                        this.doc.fontSize(12)
+                            .font('Helvetica-Bold')
+                            .fillColor(colors.text)
+                            .text('Findings:', this.margin);
+                        this.doc.moveDown(0.5);
+                        
+                        semgrep.findings.slice(0, 10).forEach((finding, index) => {
+                            this.doc.fontSize(10)
+                                .font('Helvetica-Bold')
+                                .fillColor(colors.text)
+                                .text(`${index + 1}. ${finding.check_id || finding.rule_id}`, this.margin);
+                            
+                            if (finding.severity) {
+                                this.addSeverityBadge(finding.severity, this.margin + 20, this.doc.y);
+                                this.doc.moveDown(1.2);
+                            }
+                            
+                            this.doc.fontSize(9)
+                                .font('Helvetica')
+                                .fillColor(colors.secondary)
+                                .text(`File: ${finding.path || 'N/A'}`, this.margin + 20);
+                            
+                            if (finding.message) {
+                                this.doc.fillColor(colors.text)
+                                    .text(`Message: ${finding.message.substring(0, 200)}...`, 
+                                         this.margin + 20, this.doc.y, { width: this.contentWidth - 40 });
+                            }
+                            
+                            this.doc.moveDown(0.8);
+                            this.doc.fillColor(colors.text);
+                        });
+                    }
+                } else {
+                    this.doc.fontSize(11)
+                        .fillColor(colors.success)
+                        .text('✓ No security issues detected by Semgrep', this.margin);
+                }
+
+                // ========== THREAT MODEL ==========
+                this.addPage();
+                this.addHeader('Security Pipeline Report');
+                this.addSectionHeader('Threat Model Analysis', '●');
                 
-                semgrep.findings.slice(0, 10).forEach((finding, index) => {
+                const threatModel = report.threatModel || {};
+                
+                if (threatModel.summary) {
+                    this.doc.fontSize(11);
+                    this.addInfoRow('Total Threats', threatModel.summary.totalThreats?.toString() || '0');
+                    
+                    if (threatModel.techStack) {
+                        this.doc.moveDown(0.5);
+                        this.doc.fontSize(11)
+                            .font('Helvetica-Bold')
+                            .fillColor(colors.text)
+                            .text('Technology Stack:', this.margin);
+                        this.doc.moveDown(0.3);
+                        
+                        if (threatModel.techStack.languages) {
+                            this.addInfoRow('Languages', threatModel.techStack.languages.join(', '), 20);
+                        }
+                        if (threatModel.techStack.frameworks) {
+                            this.addInfoRow('Frameworks', threatModel.techStack.frameworks.join(', '), 20);
+                        }
+                    }
+                    
+                    if (threatModel.threats && threatModel.threats.length > 0) {
+                        this.doc.moveDown(1);
+                        this.doc.fontSize(12)
+                            .font('Helvetica-Bold')
+                            .fillColor(colors.text)
+                            .text('Identified Threats:', this.margin);
+                        this.doc.moveDown(0.5);
+                        
+                        threatModel.threats.forEach((threat, index) => {
+                            this.doc.fontSize(10)
+                                .font('Helvetica-Bold')
+                                .fillColor(colors.text)
+                                .text(`${index + 1}. ${threat.title || 'Threat'}`, this.margin);
+                            
+                            if (threat.severity) {
+                                this.addSeverityBadge(threat.severity, this.margin + 20, this.doc.y);
+                                this.doc.moveDown(1.2);
+                            }
+                            
+                            if (threat.description) {
+                                this.doc.fontSize(9)
+                                    .font('Helvetica')
+                                    .fillColor(colors.text)
+                                    .text(threat.description.substring(0, 300) + '...', 
+                                         this.margin + 20, this.doc.y, { width: this.contentWidth - 40 });
+                            }
+                            
+                            this.doc.moveDown(0.8);
+                        });
+                    } else {
+                        this.doc.moveDown(0.5);
+                        this.doc.fontSize(11)
+                            .fillColor(colors.success)
+                            .text('✓ No significant threats identified', this.margin);
+                    }
+                } else {
+                    this.doc.fontSize(11)
+                        .fillColor(colors.success)
+                        .text('✓ No significant threats identified', this.margin);
+                }
+
+                // ========== GITLEAKS ==========
+                this.addPage();
+                this.addHeader('Security Pipeline Report');
+                this.addSectionHeader('Secret Detection (Gitleaks)', '●');
+                
+                if (totalSecrets > 0 && gitleaks.findings) {
+                    this.doc.fontSize(11)
+                        .fillColor(colors.danger)
+                        .font('Helvetica-Bold')
+                        .text(`⚠ WARNING: ${totalSecrets} potential secrets detected!`, this.margin);
+                    
+                    this.doc.moveDown(1);
+                    
+                    gitleaks.findings.slice(0, 10).forEach((finding, index) => {
+                        this.doc.fontSize(10)
+                            .font('Helvetica-Bold')
+                            .fillColor(colors.text)
+                            .text(`${index + 1}. ${finding.RuleID || 'Secret'}`, this.margin);
+                        
+                        this.doc.fontSize(9)
+                            .font('Helvetica')
+                            .fillColor(colors.secondary)
+                            .text(`File: ${finding.File || 'N/A'}`, this.margin + 20)
+                            .text(`Line: ${finding.StartLine || 'N/A'}`, this.margin + 20)
+                            .text(`Commit: ${finding.Commit?.substring(0, 8) || 'N/A'}`, this.margin + 20);
+                        
+                        if (finding.Match) {
+                            this.doc.fillColor(colors.danger)
+                                .text(`Match: ${finding.Match.substring(0, 50)}...`, this.margin + 20);
+                        }
+                        
+                        this.doc.moveDown(0.8);
+                        this.doc.fillColor(colors.text);
+                    });
+                } else {
+                    this.doc.fontSize(11)
+                        .fillColor(colors.success)
+                        .text('✓ No secrets or credentials detected', this.margin);
+                }
+
+                // ========== RECOMMENDATIONS ==========
+                this.addPage();
+                this.addHeader('Security Pipeline Report');
+                this.addSectionHeader('Recommendations', '●');
+                
+                const recommendations = this.generateRecommendations(report);
+                recommendations.forEach((rec, index) => {
                     this.doc.fontSize(10)
                         .font('Helvetica-Bold')
                         .fillColor(colors.text)
-                        .text(`${index + 1}. ${finding.check_id || finding.rule_id}`, this.margin);
-                    
-                    if (finding.severity) {
-                        this.addSeverityBadge(finding.severity, this.margin + 20, this.doc.y);
-                        this.doc.moveDown(1.2);
-                    }
+                        .text(`${index + 1}. ${rec.title}`, this.margin);
                     
                     this.doc.fontSize(9)
                         .font('Helvetica')
                         .fillColor(colors.secondary)
-                        .text(`File: ${finding.path || 'N/A'}`, this.margin + 20);
-                    
-                    if (finding.message) {
-                        this.doc.fillColor(colors.text)
-                            .text(`Message: ${finding.message.substring(0, 200)}...`, 
-                                 this.margin + 20, this.doc.y, { width: this.contentWidth - 40 });
-                    }
+                        .text(rec.description, this.margin + 20, this.doc.y, { 
+                            width: this.contentWidth - 40 
+                        });
                     
                     this.doc.moveDown(0.8);
                     this.doc.fillColor(colors.text);
                 });
-            }
-        } else {
-            this.doc.fontSize(11)
-                .fillColor(colors.success)
-                .text('✓ No security issues detected by Semgrep', this.margin);
-        }
 
-        // ========== THREAT MODEL ==========
-        this.addPage();
-        this.addHeader('Security Pipeline Report');
-        this.addSectionHeader('Threat Model Analysis', '●');
-        
-        const threatModel = report.threatModel || {};
-        
-        if (threatModel.summary) {
-            this.doc.fontSize(11);
-            this.addInfoRow('Total Threats', threatModel.summary.totalThreats?.toString() || '0');
-            
-            if (threatModel.techStack) {
-                this.doc.moveDown(0.5);
-                this.doc.fontSize(11)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.text)
-                    .text('Technology Stack:', this.margin);
-                this.doc.moveDown(0.3);
-                
-                if (threatModel.techStack.languages) {
-                    this.addInfoRow('Languages', threatModel.techStack.languages.join(', '), 20);
+                // Add page numbers to all pages
+                const range = this.doc.bufferedPageRange();
+                for (let i = range.start; i < range.start + range.count; i++) {
+                    this.doc.switchToPage(i);
+                    this.addFooter(i - range.start + 1);
                 }
-                if (threatModel.techStack.frameworks) {
-                    this.addInfoRow('Frameworks', threatModel.techStack.frameworks.join(', '), 20);
-                }
-            }
-            
-            if (threatModel.threats && threatModel.threats.length > 0) {
-                this.doc.moveDown(1);
-                this.doc.fontSize(12)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.text)
-                    .text('Identified Threats:', this.margin);
-                this.doc.moveDown(0.5);
+
+                // End and wait for stream to close
+                this.doc.end();
                 
-                threatModel.threats.forEach((threat, index) => {
-                    this.doc.fontSize(10)
-                        .font('Helvetica-Bold')
-                        .fillColor(colors.text)
-                        .text(`${index + 1}. ${threat.title || 'Threat'}`, this.margin);
-                    
-                    if (threat.severity) {
-                        this.addSeverityBadge(threat.severity, this.margin + 20, this.doc.y);
-                        this.doc.moveDown(1.2);
-                    }
-                    
-                    if (threat.description) {
-                        this.doc.fontSize(9)
-                            .font('Helvetica')
-                            .fillColor(colors.text)
-                            .text(threat.description.substring(0, 300) + '...', 
-                                 this.margin + 20, this.doc.y, { width: this.contentWidth - 40 });
-                    }
-                    
-                    this.doc.moveDown(0.8);
+                writeStream.on('finish', () => {
+                    resolve();
                 });
-            } else {
-                this.doc.moveDown(0.5);
-                this.doc.fontSize(11)
-                    .fillColor(colors.success)
-                    .text('✓ No significant threats identified', this.margin);
-            }
-        } else {
-            this.doc.fontSize(11)
-                .fillColor(colors.success)
-                .text('✓ No significant threats identified', this.margin);
-        }
-
-        // ========== GITLEAKS ==========
-        this.addPage();
-        this.addHeader('Security Pipeline Report');
-        this.addSectionHeader('Secret Detection (Gitleaks)', '●');
-        
-        if (totalSecrets > 0 && gitleaks.findings) {
-            this.doc.fontSize(11)
-                .fillColor(colors.danger)
-                .font('Helvetica-Bold')
-                .text(`⚠ WARNING: ${totalSecrets} potential secrets detected!`, this.margin);
-            
-            this.doc.moveDown(1);
-            
-            gitleaks.findings.slice(0, 10).forEach((finding, index) => {
-                this.doc.fontSize(10)
-                    .font('Helvetica-Bold')
-                    .fillColor(colors.text)
-                    .text(`${index + 1}. ${finding.RuleID || 'Secret'}`, this.margin);
                 
-                this.doc.fontSize(9)
-                    .font('Helvetica')
-                    .fillColor(colors.secondary)
-                    .text(`File: ${finding.File || 'N/A'}`, this.margin + 20)
-                    .text(`Line: ${finding.StartLine || 'N/A'}`, this.margin + 20)
-                    .text(`Commit: ${finding.Commit?.substring(0, 8) || 'N/A'}`, this.margin + 20);
-                
-                if (finding.Match) {
-                    this.doc.fillColor(colors.danger)
-                        .text(`Match: ${finding.Match.substring(0, 50)}...`, this.margin + 20);
-                }
-                
-                this.doc.moveDown(0.8);
-                this.doc.fillColor(colors.text);
-            });
-        } else {
-            this.doc.fontSize(11)
-                .fillColor(colors.success)
-                .text('✓ No secrets or credentials detected', this.margin);
-        }
-
-        // ========== RECOMMENDATIONS ==========
-        this.addPage();
-        this.addHeader('Security Pipeline Report');
-        this.addSectionHeader('Recommendations', '●');
-        
-        const recommendations = this.generateRecommendations(report);
-        recommendations.forEach((rec, index) => {
-            this.doc.fontSize(10)
-                .font('Helvetica-Bold')
-                .fillColor(colors.text)
-                .text(`${index + 1}. ${rec.title}`, this.margin);
-            
-            this.doc.fontSize(9)
-                .font('Helvetica')
-                .fillColor(colors.secondary)
-                .text(rec.description, this.margin + 20, this.doc.y, { 
-                    width: this.contentWidth - 40 
+                writeStream.on('error', (err) => {
+                    reject(err);
                 });
-            
-            this.doc.moveDown(0.8);
-            this.doc.fillColor(colors.text);
+                
+                this.doc.on('error', (err) => {
+                    reject(err);
+                });
+            } catch (err) {
+                reject(err);
+            }
         });
-
-        // Add page numbers to all pages
-        const range = this.doc.bufferedPageRange();
-        for (let i = range.start; i < range.start + range.count; i++) {
-            this.doc.switchToPage(i);
-            this.addFooter(i - range.start + 1);
-        }
-
-        this.doc.end();
-        return outputPath;
     }
 
     generateRecommendations(report) {
@@ -674,10 +693,14 @@ async function generatePdfReport(report) {
     const filePath = path.join(__dirname, `security-report-${Date.now()}.pdf`);
     const generator = new PDFReportGenerator();
     
-    await generator.generate(report, filePath);
-    
-    console.log("✓ Professional PDF report generated:", filePath);
-    return filePath;
+    return new Promise((resolve, reject) => {
+        generator.generate(report, filePath)
+            .then(() => {
+                console.log("✓ Professional PDF report generated:", filePath);
+                resolve(filePath);
+            })
+            .catch(reject);
+    });
 }
 
 module.exports = { generatePdfReport };

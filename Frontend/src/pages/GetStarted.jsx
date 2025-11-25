@@ -1,4 +1,4 @@
-import axios from 'axios';
+import React from 'react';
 
 const GetStarted = () => {
 
@@ -9,27 +9,69 @@ const GetStarted = () => {
             console.error(err);
         }
     }
+    
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-            <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
+        <div className="min-h-screen bg-linear-to-br w-screen from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-purple-500 rounded-full opacity-10 blur-3xl animate-pulse"></div>
+                <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-indigo-500 rounded-full opacity-10 blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+            </div>
+            
+            {/* Main content */}
+            <div className="max-w-md w-full space-y-8 p-8 bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 relative z-10 transform hover:scale-105 transition-transform duration-300">
+                {/* Logo/Icon area */}
                 <div className="text-center">
-                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-                        Welcome to Secure SDLC
+                    <div className="mx-auto w-16 h-16 bg-linear-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-4xl font-bold text-white mb-2 tracking-tight">
+                        Secure SDLC
                     </h2>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="text-purple-200 text-lg">
                         Connect with GitHub to get started
                     </p>
                 </div>
-                <div className="mt-8">
+                
+                {/* Button */}
+                <div className="mt-8 space-y-4">
                     <button
                         onClick={() => StartConnect()}
-                        className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="group relative w-full flex justify-center items-center py-4 px-6 border-2 border-transparent text-base font-semibold rounded-xl text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-purple-500/50 transform hover:scale-105 transition-all duration-200 shadow-xl hover:shadow-purple-500/50"
                     >
-                        <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <span className="absolute left-0 inset-y-0 flex items-center pl-4">
                             <GithubIcon />
                         </span>
-                        Sign in with GitHub
+                        <span className="ml-3">Sign in with GitHub</span>
+                        <svg className="ml-2 w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
                     </button>
+                    
+                    {/* Additional info */}
+                    <p className="text-center text-sm text-purple-300/80">
+                        Secure authentication powered by GitHub OAuth
+                    </p>
+                </div>
+                
+                {/* Features */}
+                <div className="pt-6 mt-6 border-t border-white/10">
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                        <div className="space-y-1">
+                            <div className="text-2xl">🔒</div>
+                            <p className="text-xs text-purple-200">Secure</p>
+                        </div>
+                        <div className="space-y-1">
+                            <div className="text-2xl">⚡</div>
+                            <p className="text-xs text-purple-200">Fast</p>
+                        </div>
+                        <div className="space-y-1">
+                            <div className="text-2xl">🚀</div>
+                            <p className="text-xs text-purple-200">Reliable</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -38,7 +80,7 @@ const GetStarted = () => {
 
 const GithubIcon = () => (
     <svg 
-        className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" 
+        className="h-6 w-6 text-white" 
         xmlns="http://www.w3.org/2000/svg" 
         viewBox="0 0 24 24" 
         fill="currentColor"

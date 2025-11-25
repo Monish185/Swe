@@ -63,6 +63,32 @@ export const githubservice = {
         const url = `${import.meta.env.VITE_BACKEND_API || 'http://localhost:3000'}/api/repos/${owner}/${repo}`;
         const res = await axios.delete(url, { withCredentials: true });
         return res.data;
-    }
+    },
 
+    /** Check if a report exists for a commit */
+    reportExists: async (owner, repo, commitId) => {
+        const url = `${import.meta.env.VITE_BACKEND_API || 'http://localhost:3000'}/api/reports/${owner}/${repo}/${commitId}`;
+        try {
+            const res = await axios.get(url, { withCredentials: true });
+            return res.data.report != null;
+        } catch (err) {
+            return false;
+        }
+    },
+
+    /** Download PDF report for a commit */
+    downloadReportPdf: async (owner, repo, commitId) => {
+        const url = `${import.meta.env.VITE_BACKEND_API || 'http://localhost:3000'}/api/reports/${owner}/${repo}/${commitId}/download-pdf`;
+        const res = await axios.post(url, {}, { withCredentials: true, responseType: 'blob' });
+        
+        // Trigger browser download
+        const blob = new Blob([res.data], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `report_${owner}_${repo}_${commitId.slice(0, 7)}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    }
 }
